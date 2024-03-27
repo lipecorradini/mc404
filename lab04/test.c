@@ -35,6 +35,7 @@ int hx_to_dec(char *str)
     return int_dec;
 }
 
+
 int size_string(char *str)
 {
 
@@ -43,6 +44,19 @@ int size_string(char *str)
         ;
     return i;
 }
+
+
+int bin_to_dec(char *str){
+
+    int result = 0;
+    for (int i = 2; i < size_string(str); ++i) {
+        result <<= 1; // Left-shift the result by 1
+        result += (str[i] - '0'); // Add the current bit
+    }
+    return result;
+
+}
+
 
 int size_base(int n, int base)
 {
@@ -56,40 +70,14 @@ int size_base(int n, int base)
     return tam;
 }
 
-void neg_dec_to_bin(int n, char *str)
-{
+// void neg_dec_to_bin(int n, char *str)
+// {
 
-    char *bin[33];
-    printf("aa\n");
-    dec_to_base(n, bin, 2);
-
-    printf("aa\n");
-    int tamanho = size_string(bin);
-    int i, carry = 1;
-
-    str[tamanho - 1] = '\0';
-
-    for (i = tamanho - 1; i >= 2; i--)
-    {
-        if (bin[i] == '1' && carry == 1)
-        {
-            str[i] = '0';
-        }
-        else if (bin[i] == '0' && carry == 1)
-        {
-            str[i] = '1';
-            carry = 0;
-        }
-        else
-        {
-            str[i] = bin[i];
-        }
-    }
-}
+    
+// }
 
 void dec_to_base(int n, char *str, int base)
 {
-
     int tam = size_base(n, base);
 
     // para números positivos
@@ -104,7 +92,6 @@ void dec_to_base(int n, char *str, int base)
         i++;
     }
 
-    // printf("pen: %c\n", str[tam+1]);
     str[tam + 2] = '\n';
     str[0] = '0';
 
@@ -155,8 +142,9 @@ int main()
 
     switch (str[0])
     {
-    case '0':
-        // tratar como hexadecimal
+    case '0': // garantido que será hexadecimal (pos ou neg)
+    
+        // por enquanto, tratando apenas os positivos
         int dec = hx_to_dec(str);
         printf("decimal: %d\n", dec);
 
@@ -171,19 +159,14 @@ int main()
         char oct[20];
         dec_to_base(dec, oct, 8);
         pr_str(oct);
+        break;     
 
-        break;
+    case '-': // garantido que será decimal negativo
 
-    case '-':
-        char neg_bin[33];
-        int neg_dec = atoi(str);
-        printf("%d\n", neg_dec);
-        printf("%d\n", neg_dec);
-        neg_dec_to_bin(neg_dec, neg_bin);
-        pr_str(neg_bin);
-
+        
     default:
-        // tratar como decimal
+        // tratar como decimal positivo
+
 
         break;
     }
