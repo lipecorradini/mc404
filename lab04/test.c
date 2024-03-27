@@ -37,7 +37,8 @@ int hx_to_dec(char *str)
 
 int dec_to_int(char *str){
     int tam = size_string(str); // nao ta funcionando
-    int result = 0, exp = pow(10, size_string(str) - 1) ; 
+    int result = 0;
+    int exp = power(10, tam - 1) ; 
     for(int i = 0; i < tam; i++){
         result += (str[i] -'0') * exp;
         exp /= 10;
@@ -45,19 +46,21 @@ int dec_to_int(char *str){
     return result;
 }
 
-int pow(int num, int exp){
-    if(exp == 1) return 0;
-    for(int i = 1; i < exp; i++){
-        num *= exp; 
+int power(int num, int exp){
+    if(exp == 0) return 1;
+    printf("o num eh %d\n", num);
+    int result = 1;
+    for(int i = 0; i < exp; i++){
+        result *= num; 
     }
-    return num;
+    return result;
 }
 
 int size_string(char *str)
 {
 
     int i = 0;
-    for (i = 0; str[i] != '\n'; i++);
+    for (i = 0; str[i] != '\0'; i++);
     return i;
 }
 
