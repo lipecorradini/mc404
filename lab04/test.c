@@ -35,16 +35,31 @@ int hx_to_dec(char *str)
     return int_dec;
 }
 
+int dec_to_int(char *str){
+    int tam = size_string(str); // nao ta funcionando
+    int result = 0, exp = pow(10, size_string(str) - 1) ; 
+    for(int i = 0; i < tam; i++){
+        result += (str[i] -'0') * exp;
+        exp /= 10;
+    }
+    return result;
+}
+
+int pow(int num, int exp){
+    if(exp == 1) return 0;
+    for(int i = 1; i < exp; i++){
+        num *= exp; 
+    }
+    return num;
+}
 
 int size_string(char *str)
 {
 
     int i = 0;
-    for (i = 0; str[i] != '\n'; i++)
-        ;
+    for (i = 0; str[i] != '\n'; i++);
     return i;
 }
-
 
 int bin_to_dec(char *str){
 
@@ -57,7 +72,6 @@ int bin_to_dec(char *str){
 
 }
 
-
 int size_base(int n, int base)
 {
     int tam = 0, new = n;
@@ -69,12 +83,6 @@ int size_base(int n, int base)
 
     return tam;
 }
-
-// void neg_dec_to_bin(int n, char *str)
-// {
-
-    
-// }
 
 void dec_to_base(int n, char *str, int base)
 {
@@ -139,24 +147,26 @@ int main()
 {
     char str[20];
     scanf("%s", str);
+    
+    char bin[32];
+    char hex[20];
+    char oct[20];
+    int dec;
 
     switch (str[0])
     {
     case '0': // garantido que será hexadecimal (pos ou neg)
     
         // por enquanto, tratando apenas os positivos
-        int dec = hx_to_dec(str);
+        dec = hx_to_dec(str);
         printf("decimal: %d\n", dec);
 
-        char bin[32];
         dec_to_base(dec, bin, 2);
         pr_str(bin);
 
-        char hex[20];
         dec_to_base(dec, hex, 16);
         pr_str(hex);
 
-        char oct[20];
         dec_to_base(dec, oct, 8);
         pr_str(oct);
         break;     
@@ -165,8 +175,18 @@ int main()
 
         
     default:
-        // tratar como decimal positivo
+        // tratar como decimal positivoint dec = hx_to_dec(str);
+        dec = dec_to_int(str);
+        printf("decimal: %d\n", dec);
 
+        dec_to_base(dec, bin, 2);
+        pr_str(bin);
+
+        dec_to_base(dec, hex, 16);
+        pr_str(hex);
+
+        dec_to_base(dec, oct, 8);
+        pr_str(oct);
 
         break;
     }
