@@ -7,8 +7,7 @@ long long hx_to_dec(char *str)
 
     long long int_dec = 0;
     long long curr_exp = 1;
-    int arr_size = (sizeof(str) - 2 * sizeof(char)) / (sizeof(char));
-
+    int arr_size = size_string(str) - 2;
     for (int i = 1; i < arr_size; i++)
         curr_exp *= 16;
 
@@ -265,7 +264,6 @@ long long endianess(char * bin, char * new){
         
         case 3:
             buff4[(i - 2) % 8] = new[i];
-            // printf("i: %d, i4: %d, new: %c\n", i, (i - 2) % 8, new[i]);
             break;
         }
     }
@@ -275,7 +273,6 @@ long long endianess(char * bin, char * new){
         {
         case 0:
             new[i] = buff4[(i - 2) % 8];
-            // printf("buff4-> ind %d: %c\n",(i - 2) % 8, buff4[(i - 2) % 8]);
             break;
         
         case 1:
@@ -293,8 +290,6 @@ long long endianess(char * bin, char * new){
 
 
     }
-        // pr_str(new);
-    // printf("resss: %lli\n", bin_to_dec(new));
    return bin_to_dec(new);
 }
 
@@ -382,7 +377,7 @@ int main()
 
         // Trocando o Endianess
         ans = endianess(bin, new_end);
-        printf("unsigned: %lli\n", ans);
+        printf("%lli\n", ans);
 
         dec_to_base(dec, hex, 16);
         pr_str(hex);
@@ -426,11 +421,11 @@ int main()
         pr_str(bin);
 
         // Só printar
-        printf("decimal: %d\n", dec);
+        printf("%lli\n", dec);
 
         // Converter para binário, trocar endianess depois para decimal unsigned
-        int ans = endianess(bin, new_end);
-        printf("unsigned: %d\n", ans);
+        ans = endianess(bin, new_end);
+        printf("%lli\n", ans);
 
         // Só transformar para hexadecimal normal
         dec_to_base(dec, hex, 16);
