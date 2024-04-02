@@ -44,7 +44,7 @@ int size_string(char *str)
 
 int dec_to_int(char *str)
 {
-    int tam = size_string(str); // nao ta funcionando
+    int tam = size_string(str);
     int result = 0;
     int exp = power(10, tam - 1);
     int mult = 1, first = 0;
@@ -81,7 +81,7 @@ long long bin_to_dec(char *str)
     long long result = 0;
     for (int i = 2; i < size_string(str); ++i)
     {
-        result <<= 1;             // Left-shift the result by 1
+        result <<= 1;            
         result += (str[i] - '0');
             }
     return result;
@@ -153,35 +153,6 @@ void pr_str(char *str)
     printf("\n");
 }
 
-void bin_to_c2(char *binario, char *novo)
-{
-    int tamanho = size_string(binario) - 2;
-
-    int i, carry = 1;
-
-    // Começa a partir do bit menos significativo
-    for (i = tamanho + 1; i >= 2; i--)
-    {
-        if (binario[i] == '1' && carry == 1)
-        {
-            novo[i] = '0';
-        }
-        else if (binario[i] == '0' && carry == 1)
-        {
-            novo[i] = '1';
-            carry = 0;
-        }
-        else
-        {
-            novo[i] = binario[i];
-        }
-    }
-
-    novo[0] = '0';
-    novo[1] = 'b';
-    novo[tamanho] = '\0';
-}
-
 void dec_to_c2(long long n, char *complemento)
 {
     int carry = 1;
@@ -216,7 +187,7 @@ long long c2_to_dec(char *binario){
 
     // Itera sobre os bits do array a partir do terceiro elemento
     for (int i = 2; binario[i] != '\0'; i++) {
-        resultado = resultado * 2 + (binario[i] - '0'); // converte o bit para inteiro ('0' é 48 na tabela ASCII)
+        resultado = resultado * 2 + (binario[i] - '0'); 
     }
 
     return resultado * sinal;
@@ -293,7 +264,7 @@ long long endianess(char * bin, char * new){
    return bin_to_dec(new);
 }
 
-char bin4ToHex(char *binary, int base) {
+char bin_to_hex(char *binary, int base) {
     int decimal = 0;
 
     // Converte o número binário para decimal
@@ -331,7 +302,7 @@ void c2_to_base(char *str, int base, char *ans){
 
         if((i-2) % g_size == 0 && i != 2){
             pr_str(group);
-            char c = bin4ToHex(group, g_size);
+            char c = bin_to_hex(group, g_size);
             ans[(i - 2) / g_size + 1] = c;
         }
         group[(i - 2) % g_size] = str[i];     
@@ -347,19 +318,33 @@ void c2_to_base(char *str, int base, char *ans){
     
 }
 
+void int_to_str(long long n, char *str){
+
+    int tam = size_base(n, 10);
+    int start = 0;
+    int isneg = 0;
+    if (n < 0){
+        start = 1;
+        str[0] = '-';
+        n *= -1;
+        isneg = 1;
+        
+    } 
+    for(int i = tam - 1; i >= 0; i--){
+        if(isneg == 0)  str[i] = ((n % 10) + '0');
+        else str[i + 1] = ((n % 10) + '0');
+        n /= 10; 
+    }
+    str[tam + 1] = '\0';
+}
+
 int main()
 {
     char str[20];
     scanf("%s", str);
 
-    char bin[35];
-    char hex[20];
-    char oct[20];
-    char bin_c2[35];
-    char new_end[35];
-    long long ans;
-
-    long long dec;
+    char bin[35], hex[20], oct[20], dec_str[30], end[35], new_end[35];
+    long long ans, dec;
 
     switch (str[0])
     {
@@ -373,11 +358,13 @@ int main()
 
         // de C2 para decimal
         long long dec_c2 = c2_to_dec(bin);
-        printf("%lli\n", dec_c2);
+        int_to_str(dec_c2, dec_str);
+        pr_str(dec_str);
 
         // Trocando o Endianess
         ans = endianess(bin, new_end);
-        printf("%lli\n", ans);
+        int_to_str(ans, end);
+        pr_str(end);
 
         dec_to_base(dec, hex, 16);
         pr_str(hex);
@@ -399,7 +386,8 @@ int main()
 
         // Trocar o Endianess e printar
         ans = endianess(bin, new_end);
-        printf("%lli\n", ans);
+        int_to_str(ans, end);
+        pr_str(end);
 
         // Inteiro para Hexadecimal
         long long hex_value = bin_to_dec(bin);
@@ -425,7 +413,8 @@ int main()
 
         // Converter para binário, trocar endianess depois para decimal unsigned
         ans = endianess(bin, new_end);
-        printf("%lli\n", ans);
+        int_to_str(ans, end);
+        pr_str(end);
 
         // Só transformar para hexadecimal normal
         dec_to_base(dec, hex, 16);
@@ -434,7 +423,6 @@ int main()
         // Só transformar para oct direto
         dec_to_base(dec, oct, 8);
         pr_str(oct);
-
         break;
     }
 }
