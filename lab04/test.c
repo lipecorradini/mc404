@@ -1,12 +1,12 @@
 #include <stdio.h>
 
-int hx_to_dec(char *str)
+long long hx_to_dec(char *str)
 {
 
     // 1 passo: transformar todos os digitos para inteiro e colocar em um array
 
-    int int_dec = 0;
-    int curr_exp = 1;
+    long long int_dec = 0;
+    long long curr_exp = 1;
     int arr_size = (sizeof(str) - 2 * sizeof(char)) / (sizeof(char));
 
     for (int i = 1; i < arr_size; i++)
@@ -77,21 +77,21 @@ int power(int num, int exp)
     return result;
 }
 
-int bin_to_dec(char *str)
+long long bin_to_dec(char *str)
 {
-
-    int result = 0;
+    long long result = 0;
     for (int i = 2; i < size_string(str); ++i)
     {
         result <<= 1;             // Left-shift the result by 1
-        result += (str[i] - '0'); // Add the current bit
-    }
+        result += (str[i] - '0');
+            }
     return result;
 }
 
 int size_base(long long n, int base)
 {
-    int tam = 0, new = n;
+    int tam = 0;
+    long long new = n;
     while (new != 0)
     {
         tam++;
@@ -107,13 +107,17 @@ void dec_to_base(long long n, char *str, int base)
 
     // para números positivos
     int i = 0;
-    int save = n;
+    long long save = n;
 
     while (n != 0)
     {
         int res = n % base;
-        // printf("%d resto por %d = %d\n", n, base, res);
-        str[tam - i + 1] = res + '0';
+        if(res > 9){
+            res = 'a' + (res - 10);
+            str[tam - i + 1] = res;
+        }else{
+            str[tam - i + 1] = res + '0';
+        }
         n /= base;
         i++;
     }
@@ -219,7 +223,7 @@ long long c2_to_dec(char *binario){
     return resultado * sinal;
 }
 
-int endianess(char * bin, char * new){
+long long endianess(char * bin, char * new){
     
     char *buff1[9];
     char *buff2[9];
@@ -290,9 +294,62 @@ int endianess(char * bin, char * new){
 
     }
         // pr_str(new);
+    // printf("resss: %lli\n", bin_to_dec(new));
+   return bin_to_dec(new);
+}
 
-    return bin_to_dec(new);
+char bin4ToHex(char *binary, int base) {
+    int decimal = 0;
 
+    // Converte o número binário para decimal
+    for (int i = 0; i < base; i++) {
+        decimal = decimal * 2 + (binary[i] - '0');
+    }
+
+    char resultDigit;
+    
+    if (base == 3) {
+        // Convert decimal to octal
+        resultDigit = '0' + (decimal % 8);
+    }else{
+    if (decimal < 10)
+        resultDigit = '0' + decimal;
+    else
+        resultDigit = 'a' + (decimal - 10);
+    }
+
+    return resultDigit;
+}
+
+void c2_to_base(char *str, int base, char *ans){
+
+    int g_size = 3;
+
+    if(base == 16){
+        g_size = 4;
+    }
+
+    char group[g_size + 1];
+    group[g_size] = '\0';
+
+    for(int i = 2; i < size_string(str) + 1; i++){
+
+        if((i-2) % g_size == 0 && i != 2){
+            pr_str(group);
+            char c = bin4ToHex(group, g_size);
+            ans[(i - 2) / g_size + 1] = c;
+        }
+        group[(i - 2) % g_size] = str[i];     
+    }
+    ans[0] = '0';
+    if(base == 8){
+        ans[1] = 'o';
+        ans[9] = '\0';
+    }else{
+        ans[1] = 'x';
+        ans[17] = '\0';
+    }
+    
 }
 
 int main()
@@ -314,6 +371,7 @@ int main()
     case '0': // garantido que será hexadecimal (pos ou neg)
 
         dec = hx_to_dec(str);
+
         // Valor em Binário
         dec_to_base(dec, bin, 2);
         pr_str(bin);
@@ -324,7 +382,7 @@ int main()
 
         // Trocando o Endianess
         ans = endianess(bin, new_end);
-        printf("unsigned: %d\n", ans);
+        printf("unsigned: %lli\n", ans);
 
         dec_to_base(dec, hex, 16);
         pr_str(hex);
@@ -346,10 +404,18 @@ int main()
 
         // Trocar o Endianess e printar
         ans = endianess(bin, new_end);
-        printf("unsigned: %d\n", ans);
+        printf("%lli\n", ans);
 
-        // usar o complemento para transformar para hexadecimal
+        // Inteiro para Hexadecimal
+        long long hex_value = bin_to_dec(bin);
+        dec_to_base(hex_value, hex, 16);
+        pr_str(hex);
 
+        // Inteiro para octal
+        long long oct_value = bin_to_dec(bin);
+        dec_to_base(oct_value, oct, 8);
+        pr_str(oct);
+        
         break;
 
     default: // DECIMAL POSITIVO
@@ -363,7 +429,6 @@ int main()
         printf("decimal: %d\n", dec);
 
         // Converter para binário, trocar endianess depois para decimal unsigned
-        
         int ans = endianess(bin, new_end);
         printf("unsigned: %d\n", ans);
 
