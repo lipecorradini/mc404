@@ -51,47 +51,80 @@ int size_string(char *str)
     return i;
 }
 
-long hx_to_dec(char *str)
+int size_base(long n, int base)
 {
-    long int_dec = 0;
-    long curr_exp = 1;
-    int arr_size = size_string(str) - 2;
-    for (int i = 1; i < arr_size; i++)
-        curr_exp *= 16;
-
-    for (int i = 2; i < arr_size + 2; i++)
+    int tam = 0;
+    long new = n;
+    while (new != 0)
     {
-        // verifica se é entre 0 e 9
-        if (str[i] <= '9' && str[i] >= '0')
-            int_dec += (str[i] - '0') * curr_exp;
-
-        else
-        {
-            // acha o valor se for letra
-            char f_char = 'a';
-            int f_num = 10;
-            while (str[i] != f_char)
-            {
-                f_char++;
-                f_num++;
-            }
-            int_dec += (f_num)*curr_exp;
-        }
-        curr_exp /= 16;
+        tam++;
+        new /= base;
     }
-    return int_dec;
+    return tam;
 }
 
-int power(int num, int exp)
+void int_to_str(long n, char *str){
+
+    int tam = size_base(n, 10);
+    int start = 0;
+    int isneg = 0;
+    if (n < 0){
+        start = 1;
+        str[0] = '-';
+        n *= -1;
+        isneg = 1;
+        char oi[3] = {'o', 'i', '\0'};
+        write(STDOUT_FD, oi, 3);
+        
+    } 
+    for(int i = tam - 1; i >= 0; i--){
+        if(isneg == 0)  str[i] = ((n % 10) + '0');
+        else str[i + 1] = ((n % 10) + '0');
+        n /= 10; 
+    }
+    str[tam + start] = '\n';
+    // str[tam + start + 1] = '\0';
+}
+
+long long power(long long num, int exp)
 {
     if (exp == 0)
         return 1;
-    int result = 1;
+    long long result = 1;
     for (int i = 0; i < exp; i++)
     {
         result *= num;
     }
     return result;
+}
+
+long hx_to_dec(char *str)
+{
+    long int_dec = 0;
+    long curr_exp = 1;
+    int arr_size = size_string(str);
+    for (int i = 1; i < arr_size - 3; i++){
+        curr_exp *= 16;
+    }
+    
+    char buff[20];
+    char i_buff[5];
+    for (int i = 2; i < arr_size - 1; i++)
+    {
+        // verifica se é entre 0 e 9
+        if (str[i] <= '9' && str[i] >= '0'){
+            int_dec += (str[i] - '0') * curr_exp;
+        }
+        else
+        {
+            // acha o valor se for letra
+            int_dec += (str[i] - 'a' + 10) * curr_exp;
+        }
+
+        curr_exp /= 16;
+    }
+
+    return int_dec;
 }
 
 long dec_to_int(char *str)
@@ -116,26 +149,27 @@ long dec_to_int(char *str)
     return result * mult;
 }
 
-long bin_to_dec(char *str)
+long long bin_to_dec(char *str)
 {
-    long result = 0;
-    for (int i = 2; i < size_string(str) - 1; ++i)
-    {
-        result += power(2, 33 - i) *  (str[i] - '0');  
-    }
-    return result;
-}
+    char buff[36];
+    char res[36];
 
-int size_base(long n, int base)
-{
-    int tam = 0;
-    long new = n;
-    while (new != 0)
+    long long result = 0;
+    for (int i = 2; i < size_string(str); i++)
     {
-        tam++;
-        new /= base;
+        result += (unsigned long)(power(2, 33 - i) * (str[i] - '0'));
     }
-    return tam;
+
+    return result;
+
+    // int tamanho_in = size_string(str), count = 0;
+    // long long val = 0;
+    // for (int i = tamanho_in - 1; i > 1; i--) {
+
+    //     val += (unsigned int)(str[i] - '0') * power(2, count);
+    //     count++;
+    // }
+    // return val;
 }
 
 void dec_to_base(long n, char *str, int base)
@@ -201,7 +235,8 @@ void dec_to_c2(long n, char *complemento)
     }
     complemento[0] = '0';
     complemento[1] = 'b';
-    complemento[34] = '\0';
+    complemento[34] = '\n';
+    complemento[35] = '\0';
 }
 
 long c2_to_dec(char *binario){
@@ -222,12 +257,9 @@ long c2_to_dec(char *binario){
     return resultado * sinal;
 }
 
-long endianess(char * bin, char * new){
+long long endianess(char * bin, char * new){
     
     char buff1[9], buff2[9], buff3[9], buff4[9];
-
-    // buff1[8] = '\0';
-    // buff2[8] = '\0';
 
     // colocando os devidos zeros antes
     int tam = size_string(bin) - 2;
@@ -263,8 +295,9 @@ long endianess(char * bin, char * new){
             buff4[(i - 2) % 8] = new[i];
             break;
         }
-    }
 
+
+    }
 
     for(int i = 2; i < 34; i++){
         switch ((i - 2) / 8)
@@ -286,6 +319,8 @@ long endianess(char * bin, char * new){
             break;
         }
     }
+
+    write(STDOUT_FD, new, size_string(new));
     
    return bin_to_dec(new);
 }
@@ -335,33 +370,12 @@ void c2_to_base(char *str, int base, char *ans){
     ans[0] = '0';
     if(base == 8){
         ans[1] = 'o';
-        ans[9] = '\0';
+        ans[11] = '\0';
     }else{
         ans[1] = 'x';
-        ans[17] = '\0';
+        ans[9] = '\0';
     }
     
-}
-
-void int_to_str(long n, char *str){
-
-    int tam = size_base(n, 10);
-    int start = 0;
-    int isneg = 0;
-    if (n < 0){
-        start = 1;
-        str[0] = '-';
-        n *= -1;
-        isneg = 1;
-        
-    } 
-    for(int i = tam - 1; i >= 0; i--){
-        if(isneg == 0)  str[i] = ((n % 10) + '0');
-        else str[i + 1] = ((n % 10) + '0');
-        n /= 10; 
-    }
-    str[tam + start] = '\n';
-    str[tam + start + 1] = '\0';
 }
 
 int main()
@@ -370,7 +384,7 @@ int main()
     int n = read(STDIN_FD, str, 20);
 
     char bin[36], hex[20], oct[20], dec_str[30], end[36], new_end[36];
-    long ans;
+    long long ans;
     long dec;
 
     switch (str[0])
@@ -378,14 +392,16 @@ int main()
     case '0': // garantido que será hexadecimal (pos ou neg)
 
         dec = hx_to_dec(str);
-        int_to_str(dec, dec_str);
 
-        write(STDOUT_FD, dec_str, size_string(dec_str) );
         // Valor em Binário
         dec_to_base(dec, bin, 2);
         write(STDOUT_FD, bin, size_string(bin));
+
+        // Valor em Decimal  
+        int_to_str(dec, dec_str);
+        write(STDOUT_FD, dec_str, size_string(dec_str) );
         
-        // de C2 para decimal
+        // de C2 para decimal (quebra no positivo)
         long dec_c2 = c2_to_dec(bin);
         int_to_str(dec_c2, dec_str);
         write(STDOUT_FD, dec_str, size_string(dec_str));
@@ -395,9 +411,12 @@ int main()
         int_to_str(ans, end);
         write(STDOUT_FD, end, size_string(end));
 
+        // Para Hexadecimal
         dec_to_base(dec, hex, 16);
         write(STDOUT_FD, hex, size_string(hex));
 
+        // Para Octal
+        dec_to_base(dec, oct, 8);
         write(STDOUT_FD, oct, size_string(oct));
         break;
 

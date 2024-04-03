@@ -195,13 +195,10 @@ long long c2_to_dec(char *binario){
 
 long long endianess(char * bin, char * new){
     
-    char *buff1[9];
-    char *buff2[9];
-    char *buff3[9];
-    char *buff4[9];
-
-    buff1[8] = '\0';
-    buff2[8] = '\0';
+    char buff1[9];
+    char buff2[9];
+    char buff3[9];
+    char buff4[9];
 
     // colocando os devidos zeros antes
     int tam = size_string(bin) - 2;
