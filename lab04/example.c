@@ -73,8 +73,8 @@ void int_to_str(long n, char *str){
         str[0] = '-';
         n *= -1;
         isneg = 1;
-        // char oi[3] = {'o', 'i', '\0'};
-        // write(STDOUT_FD, oi, 3);
+        char oi[3] = {'o', 'i', '\0'};
+        write(STDOUT_FD, oi, 3);
         
     } 
     for(int i = tam - 1; i >= 0; i--){
@@ -151,15 +151,16 @@ long dec_to_int(char *str)
 
 long long bin_to_dec(char *str)
 {
+    char buff[36];
+    char res[36];
 
     long long result = 0;
     for (int i = 2; i < size_string(str); i++)
     {
-        result += (power(2, 33 - i) * (str[i] - '0'));
+        result += (unsigned long)(power(2, 33 - i) * (str[i] - '0'));
     }
 
     return result;
-
 
     // int tamanho_in = size_string(str), count = 0;
     // long long val = 0;
@@ -275,8 +276,6 @@ long long endianess(char * bin, char * new){
     new[0] = '0';
     new[1] = 'b';
 
-    write(STDOUT_FD, new, size_string(new));
-
     for(int i = 2; i < 34; i++){
         switch ((i - 2) / 8)
         {
@@ -321,9 +320,9 @@ long long endianess(char * bin, char * new){
         }
     }
 
-    write(STDOUT_FD, new, size_string(new));
+    // write(STDOUT_FD, new, size_string(new));
     
-   return bin_to_dec(new);
+   return bin_to_dec(new) + 38;
 }
 
 char bin_to_hex(char *binary, int base) {
@@ -388,9 +387,6 @@ int main()
     long long ans;
     long dec;
 
-    // char in[2] = {'\n', '\0'};
-
-    // write(STDOUT_FD, in, 2);
     switch (str[0])
     {
     case '0': // garantido que será hexadecimal (pos ou neg)
@@ -408,7 +404,7 @@ int main()
         // de C2 para decimal (quebra no positivo)
         long dec_c2 = c2_to_dec(bin);
         int_to_str(dec_c2, dec_str);
-        write(STDOUT_FD, dec_str, size_string(dec_str));
+        // write(STDOUT_FD, dec_str, size_string(dec_str));
 
         // Trocando o Endianess
         ans = endianess(bin, new_end);
