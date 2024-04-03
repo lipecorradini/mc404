@@ -63,7 +63,7 @@ int size_base(long n, int base)
     return tam;
 }
 
-void int_to_str(long n, char *str){
+void int_to_str(unsigned long n, char *str){
 
     int tam = size_base(n, 10);
     int start = 0;
@@ -73,8 +73,8 @@ void int_to_str(long n, char *str){
         str[0] = '-';
         n *= -1;
         isneg = 1;
-        char oi[3] = {'o', 'i', '\0'};
-        write(STDOUT_FD, oi, 3);
+        // char oi[3] = {'o', 'i', '\0'};
+        // write(STDOUT_FD, oi, 3);
         
     } 
     for(int i = tam - 1; i >= 0; i--){
@@ -86,7 +86,7 @@ void int_to_str(long n, char *str){
     // str[tam + start + 1] = '\0';
 }
 
-long long power(long long num, int exp)
+long long power(int num, int exp)
 {
     if (exp == 0)
         return 1;
@@ -107,8 +107,6 @@ long hx_to_dec(char *str)
         curr_exp *= 16;
     }
     
-    char buff[20];
-    char i_buff[5];
     for (int i = 2; i < arr_size - 1; i++)
     {
         // verifica se é entre 0 e 9
@@ -157,19 +155,11 @@ long long bin_to_dec(char *str)
     long long result = 0;
     for (int i = 2; i < size_string(str); i++)
     {
-        result += (unsigned long)(power(2, 33 - i) * (str[i] - '0'));
+        result += (long long)(power(2, 33 - i) * (str[i] - '0'));
     }
 
     return result;
 
-    // int tamanho_in = size_string(str), count = 0;
-    // long long val = 0;
-    // for (int i = tamanho_in - 1; i > 1; i--) {
-
-    //     val += (unsigned int)(str[i] - '0') * power(2, count);
-    //     count++;
-    // }
-    // return val;
 }
 
 void dec_to_base(long n, char *str, int base)
@@ -186,6 +176,7 @@ void dec_to_base(long n, char *str, int base)
             res = 'a' + (res - 10);
             str[tam - i + 1] = res;
         }else{
+            if(res < 0) res = -1*res;
             str[tam - i + 1] = res + '0';
         }
         n /= base;
@@ -213,7 +204,6 @@ void dec_to_base(long n, char *str, int base)
     }
 
 
-
 }
 
 void dec_to_c2(long n, char *complemento)
@@ -239,20 +229,26 @@ void dec_to_c2(long n, char *complemento)
     complemento[35] = '\0';
 }
 
-long c2_to_dec(char *binario){
+long long c2_to_dec(char *binario){
     
-    long resultado = 0;
+    long long resultado = 0;
     int sinal = 1; // assume-se que o número é positivo inicialmente
 
-    // Verifica o sinal do número
     if (binario[2] == '1' && size_string(binario) == 34) {
         sinal = -1;
     }
 
-    // Itera sobre os bits do array a partir do terceiro elemento
-    for (int i = 2; binario[i] != '\0'; i++) {
-        resultado = resultado * 2 + (binario[i] - '0'); 
-    }
+    // int carry = 1;
+    // for (int i = 2; binario[i] != '\0'; i++) {
+    //     if(binario[i] == '0') binario[i] = '1';
+    //     else binario[i] = '0';
+    // }
+
+    // for (int i = size_string(binario) - 1; i > 1; i++) {
+    //     if(carry == 1 && )
+    // }
+
+    long long ans = bin_to_dec(binario);
 
     return resultado * sinal;
 }
@@ -385,7 +381,8 @@ int main()
 
     char bin[36], hex[20], oct[20], dec_str[30], end[36], new_end[36];
     long long ans;
-    long dec;
+    long long dec;
+    int signal = 1;
 
     switch (str[0])
     {
@@ -397,12 +394,13 @@ int main()
         dec_to_base(dec, bin, 2);
         write(STDOUT_FD, bin, size_string(bin));
 
-        // Valor em Decimal  
+        // Valor em Decimal (apenas para positivo)
+        // if(dec < 0) signal = -1;
         int_to_str(dec, dec_str);
         write(STDOUT_FD, dec_str, size_string(dec_str) );
         
         // de C2 para decimal (quebra no positivo)
-        long dec_c2 = c2_to_dec(bin);
+        unsigned long dec_c2 = c2_to_dec(bin);
         int_to_str(dec_c2, dec_str);
         // write(STDOUT_FD, dec_str, size_string(dec_str));
 
