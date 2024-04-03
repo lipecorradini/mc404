@@ -42,6 +42,18 @@ int size_string(char *str)
     return i;
 }
 
+int power(int num, int exp)
+{
+    if (exp == 0)
+        return 1;
+    int result = 1;
+    for (int i = 0; i < exp; i++)
+    {
+        result *= num;
+    }
+    return result;
+}
+
 int dec_to_int(char *str)
 {
     int tam = size_string(str);
@@ -62,18 +74,6 @@ int dec_to_int(char *str)
         exp /= 10;
     }
     return result * mult;
-}
-
-int power(int num, int exp)
-{
-    if (exp == 0)
-        return 1;
-    int result = 1;
-    for (int i = 0; i < exp; i++)
-    {
-        result *= num;
-    }
-    return result;
 }
 
 long long bin_to_dec(char *str)

@@ -51,10 +51,10 @@ int size_string(char *str)
     return i;
 }
 
-long long hx_to_dec(char *str)
+long hx_to_dec(char *str)
 {
-    long long int_dec = 0;
-    long long curr_exp = 1;
+    long int_dec = 0;
+    long curr_exp = 1;
     int arr_size = size_string(str) - 2;
     for (int i = 1; i < arr_size; i++)
         curr_exp *= 16;
@@ -75,7 +75,7 @@ long long hx_to_dec(char *str)
                 f_char++;
                 f_num++;
             }
-            int_dec = (f_num)*curr_exp;
+            int_dec += (f_num)*curr_exp;
         }
         curr_exp /= 16;
     }
@@ -94,12 +94,12 @@ int power(int num, int exp)
     return result;
 }
 
-long long dec_to_int(char *str)
+long dec_to_int(char *str)
 {
     int tam = size_string(str);
-    long long result = 0;
-    long long exp = power(10, tam - 1);
+    long result = 0;
     int mult = 1, first = 0;
+    int exp = power(10, tam - 2);
 
     if (str[0] == '-')
     {
@@ -116,21 +116,20 @@ long long dec_to_int(char *str)
     return result * mult;
 }
 
-long long bin_to_dec(char *str)
+long bin_to_dec(char *str)
 {
-    long long result = 0;
-    for (int i = 2; i < size_string(str); ++i)
+    long result = 0;
+    for (int i = 2; i < size_string(str) - 1; ++i)
     {
-        result <<= 1;            
-        result += (str[i] - '0');
+        result += power(2, 33 - i) *  (str[i] - '0');  
     }
     return result;
 }
 
-int size_base(long long n, int base)
+int size_base(long n, int base)
 {
     int tam = 0;
-    long long new = n;
+    long new = n;
     while (new != 0)
     {
         tam++;
@@ -139,13 +138,12 @@ int size_base(long long n, int base)
     return tam;
 }
 
-void dec_to_base(long long n, char *str, int base)
+void dec_to_base(long n, char *str, int base)
 {
     int tam = size_base(n, base);
 
     // para números positivos
     int i = 0;
-    long long save = n;
 
     while (n != 0)
     {
@@ -159,9 +157,10 @@ void dec_to_base(long long n, char *str, int base)
         n /= base;
         i++;
     }
-
-    str[tam + 2] = '\0';
+    str[tam + 2] = '\n';
+    str[tam + 3] = '\0';
     str[0] = '0';
+
 
     switch (base)
     {
@@ -179,9 +178,11 @@ void dec_to_base(long long n, char *str, int base)
         break;
     }
 
+
+
 }
 
-void dec_to_c2(long long n, char *complemento)
+void dec_to_c2(long n, char *complemento)
 {
     int carry = 1;
     n *= -1;
@@ -203,9 +204,9 @@ void dec_to_c2(long long n, char *complemento)
     complemento[34] = '\0';
 }
 
-long long c2_to_dec(char *binario){
+long c2_to_dec(char *binario){
     
-    long long resultado = 0;
+    long resultado = 0;
     int sinal = 1; // assume-se que o número é positivo inicialmente
 
     // Verifica o sinal do número
@@ -221,7 +222,7 @@ long long c2_to_dec(char *binario){
     return resultado * sinal;
 }
 
-long long endianess(char * bin, char * new){
+long endianess(char * bin, char * new){
     
     char buff1[9], buff2[9], buff3[9], buff4[9];
 
@@ -230,15 +231,16 @@ long long endianess(char * bin, char * new){
 
     // colocando os devidos zeros antes
     int tam = size_string(bin) - 2;
-    for(int i = 2; i < (34 - tam); i++){
+    for(int i = 2; i < (34 - tam + 1); i++){
         new[i] = '0';
     }
 
-    for(int i = (34 - tam); i < 34; i++){
-        new[i] = bin[i - 34 + tam + 2];
+    for(int i = (34 - tam + 1); i < 34; i++){
+        new[i] = bin[i - 34 + tam + 1];
     }
 
-    new[34] = '\0';
+    new[34] = '\n';
+    new[35] = '\0';
     new[0] = '0';
     new[1] = 'b';
 
@@ -263,6 +265,7 @@ long long endianess(char * bin, char * new){
         }
     }
 
+
     for(int i = 2; i < 34; i++){
         switch ((i - 2) / 8)
         {
@@ -283,6 +286,7 @@ long long endianess(char * bin, char * new){
             break;
         }
     }
+    
    return bin_to_dec(new);
 }
 
@@ -339,7 +343,7 @@ void c2_to_base(char *str, int base, char *ans){
     
 }
 
-void int_to_str(long long n, char *str){
+void int_to_str(long n, char *str){
 
     int tam = size_base(n, 10);
     int start = 0;
@@ -356,7 +360,8 @@ void int_to_str(long long n, char *str){
         else str[i + 1] = ((n % 10) + '0');
         n /= 10; 
     }
-    str[tam + 1] = '\0';
+    str[tam + start] = '\n';
+    str[tam + start + 1] = '\0';
 }
 
 int main()
@@ -364,21 +369,24 @@ int main()
     char str[20];
     int n = read(STDIN_FD, str, 20);
 
-    char bin[35], hex[20], oct[20], dec_str[30], end[35], new_end[35];
-    long long ans, dec;
+    char bin[36], hex[20], oct[20], dec_str[30], end[36], new_end[36];
+    long ans;
+    long dec;
 
     switch (str[0])
     {
     case '0': // garantido que será hexadecimal (pos ou neg)
 
         dec = hx_to_dec(str);
+        int_to_str(dec, dec_str);
 
+        write(STDOUT_FD, dec_str, size_string(dec_str) );
         // Valor em Binário
         dec_to_base(dec, bin, 2);
         write(STDOUT_FD, bin, size_string(bin));
         
         // de C2 para decimal
-        long long dec_c2 = c2_to_dec(bin);
+        long dec_c2 = c2_to_dec(bin);
         int_to_str(dec_c2, dec_str);
         write(STDOUT_FD, dec_str, size_string(dec_str));
 
@@ -410,12 +418,12 @@ int main()
         write(STDOUT_FD, end, size_string(end));
 
         // Inteiro para Hexadecimal
-        long long hex_value = bin_to_dec(bin);
+        long hex_value = bin_to_dec(bin);
         dec_to_base(hex_value, hex, 16);
         write(STDOUT_FD, hex, size_string(hex));
 
         // Inteiro para octal
-        long long oct_value = bin_to_dec(bin);
+        long oct_value = bin_to_dec(bin);
         dec_to_base(oct_value, oct, 8);
         write(STDOUT_FD, oct, size_string(oct));
         
@@ -429,7 +437,8 @@ int main()
         write(STDOUT_FD, bin, size_string(bin));
 
         // Só printar
-        write(STDOUT_FD, str, size_string(str));
+        int_to_str(dec, dec_str);
+        write(STDOUT_FD, dec_str, size_string(dec_str));
 
         // Converter para binário, trocar endianess depois para decimal unsigned
         ans = endianess(bin, new_end);
