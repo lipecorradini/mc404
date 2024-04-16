@@ -4,41 +4,41 @@
 #define MASK(j) (1<<j) // peja o j-ésimo bit, so fazer um and pra verificar se é 1
 
 void pack(int input, int start_bit, int end_bit, int packed){
-    
+    // provavelmente, fazer o packed como um ponteiro seria mais fácil de converter depois
+
     // iterar pelos índices de comeco em fim no input
     // adicionar o valor à packed se for 1
     // retornar packed (fazer para todos os int)
 
 }
 
-int power(int num, int exp)
-{
-    if (exp == 0)
-        return 1;
-    int result = 1;
-    for (int i = 0; i < exp; i++)
-    {
-        result *= num;
-    }
-    return result;
-}
+// int power(int num, int exp)
+// {
+//     if (exp == 0)
+//         return 1;
+//     int result = 1;
+//     for (int i = 0; i < exp; i++)
+//     {
+//         result *= num;
+//     }
+//     return result;
+// }
 
 int bin_to_dec(char *str)
 {
     int result = 0;
     for (int i = 0; i < 4; i++)
     {
-        result += (int)(power(2, 3 - i) * (str[i] - '0'));
+        result += (1 << (3 - i)) * (str[i] - '0');
     }
     return result;
 
 }
 
 void printBits(int num) {
-    // Number of bits in an int
+
     int numBits = sizeof(int) * 8;
     
-    // Mask to check each bit
     unsigned int mask = 1 << (numBits - 1);
     
     printf("Binary representation of %d: ", num);

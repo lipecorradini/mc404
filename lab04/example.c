@@ -63,12 +63,12 @@ int size_base(long n, int base)
     return tam;
 }
 
-void int_to_str(unsigned long n, char *str){
+void int_to_str(unsigned long n, char *str, int signal){
 
     int tam = size_base(n, 10);
     int start = 0;
     int isneg = 0;
-    if (n < 0){
+    if (signal == -1){
         start = 1;
         str[0] = '-';
         n *= -1;
@@ -147,19 +147,29 @@ long dec_to_int(char *str)
     return result * mult;
 }
 
-long long bin_to_dec(char *str)
-{
-    char buff[36];
-    char res[36];
+unsigned long bin_to_dec(char *str)
+{   
+    char res_buff[36];
+    char buff_v[3];
+    buff_v[1] = '\n';
+    buff_v[2] = '\0';
+
 
     long long result = 0;
+
+    write(STDOUT_FD, str, size_string(str));
     for (int i = 2; i < size_string(str); i++)
     {
-        result += (long long)(power(2, 33 - i) * (str[i] - '0'));
+        result += (power(2, 33 - i) * (str[i] - '0'));
+        buff_v[0] = str[i];
+        // write(STDOUT_FD, buff_v, 3);
+
+        int_to_str(result, res_buff, 1);
+        // write(STDOUT_FD, res_buff, size_string(res_buff));
+
     }
 
     return result;
-
 }
 
 void dec_to_base(long n, char *str, int base)
@@ -238,20 +248,15 @@ long long c2_to_dec(char *binario){
         sinal = -1;
     }
 
-    // int carry = 1;
-    // for (int i = 2; binario[i] != '\0'; i++) {
-    //     if(binario[i] == '0') binario[i] = '1';
-    //     else binario[i] = '0';
-    // }
+    resultado = bin_to_dec(binario);
 
-    // for (int i = size_string(binario) - 1; i > 1; i++) {
-    //     if(carry == 1 && )
-    // }
-
-    long long ans = bin_to_dec(binario);
+    // char buff[36];
+    // int_to_str(resultado, buff, 1);
+    // write(STDOUT_FD, buff, size_string(buff));
 
     return resultado * sinal;
 }
+
 
 long long endianess(char * bin, char * new){
     
@@ -321,19 +326,28 @@ long long endianess(char * bin, char * new){
    return bin_to_dec(new) + 38;
 }
 
+void printint(int io){
+   
+    char buff[10];
+    int_to_str(io, buff, 1);
+    write(STDOUT_FD, buff, size_string(buff));
+}
+
 char bin_to_hex(char *binary, int base) {
     int decimal = 0;
 
     // Converte o número binário para decimal
     for (int i = 0; i < base; i++) {
-        decimal = decimal * 2 + (binary[i] - '0');
+        decimal += power(2, base - i - 1) * (binary[i] - '0');
     }
+
 
     char resultDigit;
     
     if (base == 3) {
+        printint(decimal);  
         // Convert decimal to octal
-        resultDigit = '0' + (decimal % 8);
+        resultDigit = '0' + decimal;
     }else{
     if (decimal < 10)
         resultDigit = '0' + decimal;
@@ -343,6 +357,8 @@ char bin_to_hex(char *binary, int base) {
 
     return resultDigit;
 }
+
+
 
 void c2_to_base(char *str, int base, char *ans){
 
@@ -355,14 +371,22 @@ void c2_to_base(char *str, int base, char *ans){
     char group[g_size + 1];
     group[g_size] = '\0';
 
-    for(int i = 2; i < size_string(str) + 1; i++){
+    printint(base * 100 + g_size);
 
+    for(int i = 2; i < size_string(str); i++){
+
+        printint(i);
         if((i-2) % g_size == 0 && i != 2){
+            printint(1000 + i);
+            printint(10000 + (i-2)/g_size + 1);
             char c = bin_to_hex(group, g_size);
             ans[(i - 2) / g_size + 1] = c;
         }
         group[(i - 2) % g_size] = str[i];     
     }
+
+    int a = 2020;
+    printint(a);
     ans[0] = '0';
     if(base == 8){
         ans[1] = 'o';
@@ -374,12 +398,20 @@ void c2_to_base(char *str, int base, char *ans){
     
 }
 
+void str_copy(char *first, char *dest){
+    for(int i = 0; i < size_string(first); i++){
+        dest[i] = first[i];
+    }
+    dest[size_string(first)] = '\0';
+
+}
+
 int main()
 {
     char str[20];
     int n = read(STDIN_FD, str, 20);
 
-    char bin[36], hex[20], oct[20], dec_str[30], end[36], new_end[36];
+    char bin[36], hex[20], oct[20], dec_str[30], end[36], new_end[36], c2[36];
     long long ans;
     long long dec;
     int signal = 1;
@@ -395,18 +427,18 @@ int main()
         write(STDOUT_FD, bin, size_string(bin));
 
         // Valor em Decimal (apenas para positivo)
-        // if(dec < 0) signal = -1;
-        int_to_str(dec, dec_str);
+        if(dec < 0) signal = -1;
+        int_to_str(dec, dec_str, signal);
         write(STDOUT_FD, dec_str, size_string(dec_str) );
         
         // de C2 para decimal (quebra no positivo)
         unsigned long dec_c2 = c2_to_dec(bin);
-        int_to_str(dec_c2, dec_str);
+        int_to_str(dec_c2, dec_str, signal);
         // write(STDOUT_FD, dec_str, size_string(dec_str));
 
         // Trocando o Endianess
         ans = endianess(bin, new_end);
-        int_to_str(ans, end);
+        int_to_str(ans, end, 1);
         write(STDOUT_FD, end, size_string(end));
 
         // Para Hexadecimal
@@ -415,7 +447,8 @@ int main()
 
         // Para Octal
         dec_to_base(dec, oct, 8);
-        write(STDOUT_FD, oct, size_string(oct));
+        write(STDOUT_FD, oct, size_string(oct)); 
+        
         break;
 
     case '-': // DECIMAL NEGATIVO
@@ -429,19 +462,28 @@ int main()
         // Printar Decimal
         write(STDOUT_FD, str, size_string(str));
 
+        str_copy(bin, c2);
+
         // Trocar o Endianess e printar
         ans = endianess(bin, new_end);
-        int_to_str(ans, end);
+        int_to_str(ans, end, 1);
         write(STDOUT_FD, end, size_string(end));
 
         // Inteiro para Hexadecimal
-        long hex_value = bin_to_dec(bin);
-        dec_to_base(hex_value, hex, 16);
+        // long long hex_value = c2_to_dec(c2);
+        // int_to_str(hex_value, hex, 1);
+        c2_to_base(c2, 16, hex);
+
+        // c2_to_base(bin, 16, hex);
         write(STDOUT_FD, hex, size_string(hex));
 
         // Inteiro para octal
-        long oct_value = bin_to_dec(bin);
-        dec_to_base(oct_value, oct, 8);
+        // long long oct_value = c2_to_dec(c2);
+        // int_to_str(oct_value, oct, 1);
+        // dec_to_base(oct_value, oct, 8);
+        c2_to_base(c2, 8, oct);
+
+        // c2_to_base(bin, 8, oct);
         write(STDOUT_FD, oct, size_string(oct));
         
         break;
@@ -454,12 +496,12 @@ int main()
         write(STDOUT_FD, bin, size_string(bin));
 
         // Só printar
-        int_to_str(dec, dec_str);
+        int_to_str(dec, dec_str, signal);
         write(STDOUT_FD, dec_str, size_string(dec_str));
 
         // Converter para binário, trocar endianess depois para decimal unsigned
         ans = endianess(bin, new_end);
-        int_to_str(ans, end);
+        int_to_str(ans, end, 1);
         write(STDOUT_FD, end, size_string(end));
 
         // Só transformar para hexadecimal normal
