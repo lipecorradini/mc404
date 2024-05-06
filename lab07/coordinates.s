@@ -26,8 +26,10 @@ main:
     la s2, times_out
     jal times_to_int # retorna os tempos em posições distintas de s2(talvez seja mais inteligente separar em registradores mesmo)
 
-    # a partir daqui, ja deveríamos ter os números inteiros guardados nos registradores, cada um ocupando 4 bytes
+    jal calculating_distances
+    jal calculating_x_y
 
+    # so falta printar
     lw ra,0(sp)
     addi sp, sp, 4
 
@@ -82,6 +84,56 @@ coordinates_to_int:
         sw a5, 0(s3) # Yb guardado em 1(s3)
         ret
 
+
+calculating_distances:
+    
+    # da: a8, db: a9:, dc:a10
+    # tr, ta, tb e tc: guardados em s2
+    lw t4, (s2) # tr: t4
+    addi s2, s2, 4
+    lw t1, (s2) # ta: t1
+    addi s2, s2, 4
+    lw t2, (s2) # ta: t1
+    addi s2, s2, 4
+    lw t3, (s2) # ta: t1
+
+    sub a1, t4, t1
+    sub a2, t4, t2
+    sub a3, t4, t3
+
+    # retorna as distancias em a1, a2 e a3
+    li t5, 300000000
+    mul a1, a1, t5
+    mul a2, a2, t5
+    mul a3, a3, t5
+
+    # aloca xc e yb em a4 e a5
+    lw a4, (s3)
+    addi s3, s3, 4
+    lw a5, (s3)
+
+    ret
+
+calculating_x_y:
+    # Retorna x em s4
+    
+    mul s4, a1, a1
+    mul t2, a3, a3 
+    sub s4, s4, t2 # da² - dc²
+    mul t2, a4, a4
+    sub s4, s4, t2 # (da² - dc²) - xc²
+    addi t2, a4, a4
+    div s4, s4, t2 # ((da² - dc²) - xc²)/(2xc)
+
+    # Retorna y em s5
+    
+    mul s5, a1, a1 # da²
+    mul t2, a5, a5 # yb²
+    add s5, s5, t2 # da² + yb²
+    mul t2, a2, a2 # db²
+    sub s5, s5, t2 # (da² + yb²) - db²
+    add t2, a5, a5 # 2yb
+    div s5, s5, t2 # ((da² + yb²) - db²)/(2yb)
 
 
 
