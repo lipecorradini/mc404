@@ -6,111 +6,142 @@ _start:
     li a7, 93 # exit
     ecall
 
+.text 
+
+# Xc: s6
+# Yb: a5
+# ta: t1
+# tb: t2
+# tc: t3
+# tr: t4
+# da: a1
+# db: a2
+# dc: a3 
+# x: s4
+# y: s5
+
 main:
 
     addi sp,sp,-4
     sw ra, 0(sp)
-    # Código aqui
+
+    la s0, input_address
+    la s1, result
 
     jal read_coordinates
-    la s0, coordinates_in
-    la s3, coordinates_out
-    jal coordinates_to_int # 0(s3): Xc; 1(s3): Yb
-
-    lw a7, 0(s3)
-    jal save_answer
-    jal write
-
     jal read_times
-    la s1, times_in
-    la s2, times_out
-    jal times_to_int # retorna os tempos em posições distintas de s2(talvez seja mais inteligente separar em registradores mesmo)
-
+    parando:
     jal calculating_distances
     jal calculating_x_y
 
-    # so falta printar
+    mv a7, s4
+    jal save_answer
+
+    addi s1, s1, 5
+    
+    mv a7, s5
+    jal save_answer
+
+    jal write
+
     lw ra,0(sp)
     addi sp, sp, 4
 
+    ret
 
-times_to_int:
+read_coordinates:
 
-    li t1, 0
-    li t2, 4
+    addi sp,sp,-4
+    sw ra, 0(sp)
 
-    loop_times_to_int:
-        
-        bge t1, t2, end_loop_times_to_int
-        jal read_digit
-        sw a5, (s2)
-        addi s1, s1, 5 # Atualizando ponteiros da entrada
-        addi s2, s2, 5 # Atualizando ponteiros da saída, ns se ta certo
-        addi t1, t1, 1
-        j loop_times_to_int
-    
-    end_loop_times_to_int:
-        ret
-
-
-coordinates_to_int:
+    la s0, input_address
+    li a2, 12
+    jal read
 
     li t1, 1 # Multiplicador
     li t3, -1
     li t4, 45
     lb t2, 0(s0) # Lê o sinal
-    bne t2, t4, if_coordinates_to_int # Se for positivo, pula
+    bne t2, t4, if_read_coordinates # Se for positivo, pula
+    mul t1, t1, t3 # Se o sinal for negativo, multiplica por -1
+
+    if_read_coordinates:
+    
+    addi s0, s0, 1 # Ajusta o ponteiro
+    jal read_digit # Número INT em a5
+    mul a5, a5, t1 # Multiplicando pelo sinal, e guardando Xc em s6
+    mv s6, a5
+    li t1, 1
+
+    addi s0, s0, 5
+
+    lb t2, 0(s0)
+    bne t2, t4, if_read_coordinates_2
     mul t1, t1, t3 # Se o sinal for negativo
 
-    if_coordinates_to_int:
-        addi s0, s0, 1 # Ajusta o ponteiro
-        jal read_digit # Número INT em a5
-        mul a5, a5, t1 # Multiplicando pelo sinal
-        sw a5, 0(s3) # Xc guardado em 0(s0), verificar se funciona
-        li t1, 1
+    if_read_coordinates_2:
 
-        addi s0, s0, 5
-
-        lb t2, 0(s0)
-        bne t2, t4, if_coordinates_to_int_2
-        mul t1, t1, t3 # Se o sinal for negativo
-
-    if_coordinates_to_int_2:
-
-        addi s0, s0, 1 # Precisa?
-        addi s3, s3, 4
-        jal read_digit # Número INT em a5
-        mul a5, a5, t1 # Multiplicando pelo sinal
-        sw a5, 0(s3) # Yb guardado em 1(s3)
-        ret
-
-
-calculating_distances:
+    addi s0, s0, 1
+    jal read_digit # Número INT em a5
+    mul a5, a5, t1 # Multiplicando pelo sinal, e yb está em a6
+    mv a6, a5
     
-    # da: a8, db: a9:, dc:a10
-    # tr, ta, tb e tc: guardados em s2
+    lw ra,0(sp)
+    addi sp, sp, 4
+    ret
+
+read_times:
+
+    addi sp,sp,-4
+    sw ra, 0(sp)
+    la s2, times
+    
+    la s0, input_address
+    li a2, 20
+    jal read
+
+    li t1, 0
+    li t2, 4
+
+    loop_read_times:
+        
+    bge t1, t2, end_loop_read_times
+    jal read_digit
+    sw a5, (s2)
+    addi s0, s0, 5 # Atualizando ponteiros da entrada
+    addi s2, s2, 4 # Atualizando ponteiros da saída
+    addi t1, t1, 1
+    j loop_read_times
+    
+    end_loop_read_times:
+
+    la s2, times
     lw t4, (s2) # tr: t4
     addi s2, s2, 4
     lw t1, (s2) # ta: t1
     addi s2, s2, 4
-    lw t2, (s2) # ta: t1
+    lw t2, (s2) # tb: t2
     addi s2, s2, 4
-    lw t3, (s2) # ta: t1
+    lw t3, (s2) # tc: t3
 
+    debug:
+
+    lw ra, 0(sp)
+    addi sp, sp, 4
+
+    ret
+
+calculating_distances:
+    
     sub a1, t4, t1
     sub a2, t4, t2
     sub a3, t4, t3
 
     # retorna as distancias em a1, a2 e a3
     li t5, 300000000
-    mul a1, a1, t5
+    mul a1, a1, t5 # da
     mul a2, a2, t5
     mul a3, a3, t5
-
-    # aloca xc e yb em a4 e a5
-    lw a4, (s3)
-    addi s3, s3, 4
-    lw a5, (s3)
 
     ret
 
@@ -122,7 +153,7 @@ calculating_x_y:
     sub s4, s4, t2 # da² - dc²
     mul t2, a4, a4
     sub s4, s4, t2 # (da² - dc²) - xc²
-    addi t2, a4, a4
+    add t2, a4, a4
     div s4, s4, t2 # ((da² - dc²) - xc²)/(2xc)
 
     # Retorna y em s5
@@ -135,6 +166,7 @@ calculating_x_y:
     add t2, a5, a5 # 2yb
     div s5, s5, t2 # ((da² + yb²) - db²)/(2yb)
 
+    ret
 
 
 read_digit:
@@ -155,14 +187,6 @@ read_digit:
     lbu a4, 3(s0)
     addi a4, a4, -48
 
-    jal bit_to_int
-    ret
-
-bit_to_int:
-    
-    # input: 4 bytes guardado em 4 registradores diferentes
-    # output: soma todos os valores e guarda em a5
-
     li t6, 1000
     mul a1, a1, t6
     li t6, 100
@@ -180,22 +204,11 @@ bit_to_int:
 
     ret
 
-
-
-
-read_coordinates:
-    li a0, 0            # file descriptor = 0 (stdin)
-    la a1, coordinates_in  # buffer
-    li a2, 12           # size -
-    li a7, 63           # syscall read (63)
-    ecall
-    ret
-
-read_times:
-    li a0, 0            # file descriptor = 0 (stdin)
-    la a1, coordinates_out       # buffer
-    li a2, 20           # size - Reads 20 bytes.
-    li a7, 63           # syscall read (63)
+read: # Precisa colocar o tamanho antes
+    
+    li a0, 0
+    la a1, input_address  # buffer
+    li a7, 63
     ecall
     ret
 
@@ -231,7 +244,7 @@ save_answer:
 
 write:
     li a0, 1            # file descriptor = 1 (stdout)
-    la a1, coordinates_out       # buffer
+    la a1, result       # buffer
     li a2, 20           # size - Writes 20 bytes.
     li a7, 64           # syscall write (64)
     ecall
@@ -240,10 +253,6 @@ write:
 
 .bss
 
-coordinates_in: .skip 12 # buffer
-coordinates_out: .skip 20
-
-times_in: .skip 0x20
-times_out: .skip 18
-
-result: .skip 0x20
+times: .skip 40
+result: .skip 40
+input_address: .skip 40
