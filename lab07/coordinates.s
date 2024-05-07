@@ -9,7 +9,7 @@ _start:
 .text 
 
 # Xc: s6
-# Yb: a5
+# Yb: a6
 # ta: t1
 # tb: t2
 # tc: t3
@@ -30,9 +30,9 @@ main:
 
     jal read_coordinates
     jal read_times
-    parando:
     jal calculating_distances
     jal calculating_x_y
+    ver_x_y:
 
     mv a7, s4
     jal save_answer
@@ -124,7 +124,6 @@ read_times:
     addi s2, s2, 4
     lw t3, (s2) # tc: t3
 
-    debug:
 
     lw ra, 0(sp)
     addi sp, sp, 4
@@ -137,35 +136,46 @@ calculating_distances:
     sub a2, t4, t2
     sub a3, t4, t3
 
+    parando_antes:
+
     # retorna as distancias em a1, a2 e a3
-    li t5, 300000000
+    li t5, 3
+    li t6, 10
     mul a1, a1, t5 # da
-    mul a2, a2, t5
-    mul a3, a3, t5
+    div a1, a1, t6
+
+    mul a2, a2, t5 # db
+    div a2, a2, t6
+
+    mul a3, a3, t5 # dc
+    div a3, a3, t6
+
+
 
     ret
 
 calculating_x_y:
     # Retorna x em s4
     
-    mul s4, a1, a1
-    mul t2, a3, a3 
+    mul s4, a1, a1 # da²
+    mul t2, a3, a3 # dc²
     sub s4, s4, t2 # da² - dc²
-    mul t2, a4, a4
-    sub s4, s4, t2 # (da² - dc²) - xc²
-    add t2, a4, a4
-    div s4, s4, t2 # ((da² - dc²) - xc²)/(2xc)
+    mul t2, s6, s6 # xc²
+    x:
+    add s4, s4, t2 # (da² - dc²) + xc²
+    add t2, s6, s6 # 2xc
+    div s4, s4, t2 # ((da² - dc²) + xc²)/(2xc)
 
     # Retorna y em s5
     
+    y:
     mul s5, a1, a1 # da²
-    mul t2, a5, a5 # yb²
+    mul t2, a6, a6 # yb²
     add s5, s5, t2 # da² + yb²
     mul t2, a2, a2 # db²
     sub s5, s5, t2 # (da² + yb²) - db²
-    add t2, a5, a5 # 2yb
+    add t2, a6, a6 # 2yb
     div s5, s5, t2 # ((da² + yb²) - db²)/(2yb)
-
     ret
 
 
@@ -175,6 +185,13 @@ read_digit:
     # obs: nessa função, pode variar o valor do a0. ou seja,
      # assim que ler os 4 primeiros, soma-se 5 ao ponteiro
 
+    li t6, 43 # +
+
+    beq a7, t6, cont_read_digit
+    li t5, -1
+    mul a7, a7, t5
+
+    cont_read_digit:
     lbu a1, 0(s0)
     addi a1, a1, -48
 
@@ -216,6 +233,16 @@ save_answer:
 
     # input: a7 é o número inteiro
 
+    li t5, 0
+    li t6, 43 # +
+    sb t6, (s1)
+    bge a7, t5, cont_save_ans
+    li t6, 45
+    sb t6, (s1)
+
+
+    cont_save_ans:
+    addi s1, s1, 1
     li t5, 1000
     div t6, a7, t5
     addi t6, t6, 48
@@ -228,6 +255,7 @@ save_answer:
     sb t6, 1(s1) # Guarda em s1 na memória
     rem a7, a7, t5
 
+    aq_ta_dando_erro:
     li t5, 10
     div t6, a7, t5
     addi t6, t6, 48
