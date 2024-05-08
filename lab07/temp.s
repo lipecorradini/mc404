@@ -109,7 +109,7 @@ read_times:
     lb a0, (s0)
     lb a0, 1(s0)
 
-    addi s0, s0, 1
+    # addi s0, s0, 1
 
     li t1, 0
     li t2, 4
