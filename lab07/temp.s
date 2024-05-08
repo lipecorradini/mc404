@@ -29,7 +29,9 @@ main:
     la s1, result
 
     jal read_coordinates
+    ver_cord:
     jal read_times
+    ver_tempos:
     jal calculating_distances
     jal calculating_x_y
     ver_x_y:
@@ -57,6 +59,10 @@ read_coordinates:
     la s0, input_address
     li a2, 12
     jal read
+    ver_erro_cord:
+    lb a0, (s0)
+    lb a0, 1(s0)
+
 
     li t1, 1 # Multiplicador
     li t3, -1
@@ -72,7 +78,6 @@ read_coordinates:
     mul a5, a5, t1 # Multiplicando pelo sinal, e guardando Xc em s6
     mv s6, a5
     li t1, 1
-    ver_xc:
 
     addi s0, s0, 5
 
@@ -86,7 +91,6 @@ read_coordinates:
     jal read_digit # Número INT em a5
     mul a5, a5, t1 # Multiplicando pelo sinal, e yb está em a6
     mv a6, a5
-    ver_yb:
     
     lw ra,0(sp)
     addi sp, sp, 4
@@ -96,11 +100,16 @@ read_times:
 
     addi sp,sp,-4
     sw ra, 0(sp)
-    la s2, times
     
+    la s2, times
     la s0, input_address
     li a2, 20
     jal read
+    ver_erro_times:
+    lb a0, (s0)
+    lb a0, 1(s0)
+
+    addi s0, s0, 1
 
     li t1, 0
     li t2, 4
@@ -109,7 +118,6 @@ read_times:
         
     bge t1, t2, end_loop_read_times
     jal read_digit
-    ver_n_digit:
     sw a5, (s2)
     addi s0, s0, 5 # Atualizando ponteiros da entrada
     addi s2, s2, 4 # Atualizando ponteiros da saída
@@ -188,13 +196,13 @@ read_digit:
     # obs: nessa função, pode variar o valor do a0. ou seja,
      # assim que ler os 4 primeiros, soma-se 5 ao ponteiro
 
-    # li t6, 43 # +
-# 
-    # beq a7, t6, cont_read_digit
-    # li t5, -1
-    # mul a7, a7, t5
+    li t6, 43 # +
 
-    # cont_read_digit:
+    beq a7, t6, cont_read_digit
+    li t5, -1
+    mul a7, a7, t5
+
+    cont_read_digit:
     lbu a1, 0(s0)
     addi a1, a1, -48
 
@@ -237,15 +245,21 @@ save_answer:
     # input: a7 é o número inteiro
 
     li t5, 0
-    li t6, 43 # +
     sb t6, (s1)
-    bge a7, t5, cont_save_ans
+    bge a7, t5, positive
     li t6, 45
     sb t6, (s1)
+    li t6, -1
+    mul a7, a7, t6
+    j cont_save_ans
 
+    positive:
+    li t6, 43 # +
+    sb t6, (s1)
 
     cont_save_ans:
     addi s1, s1, 1
+
     li t5, 1000
     div t6, a7, t5
     addi t6, t6, 48
@@ -258,7 +272,6 @@ save_answer:
     sb t6, 1(s1) # Guarda em s1 na memória
     rem a7, a7, t5
 
-    aq_ta_dando_erro:
     li t5, 10
     div t6, a7, t5
     addi t6, t6, 48
