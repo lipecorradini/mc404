@@ -14,16 +14,16 @@ main:
     jal open
 
     # Lendo o arquivo inteiro
-    li a0, input_file
-    li a2, 262159
     jal read
-    mv s0, a0
+    mv s0, a1
     
     # Lendo o cabeçalho
     jal getSize
 
+    # Setando o Canvas
     jal setCanvasSize
 
+    # Salvando os Pixels no Canvas
     jal handleMatrix
 
     lw ra, 0(sp)
@@ -36,18 +36,19 @@ getSize:
     # s0: ponteiro atualizado para o começo da matriz
 
     addi s0, s0, 3 # Começaremos pelo 3 byte sempre
+    li t1, 32 # Barra de Espaço
     
     lb s1, 0(s0) # Primeiro dígito do tamanho
     addi s1, s1, -48
     addi s0, s0, 1
 
     lb s2, 0(s0) # Segundo dígito do tamanho
-    beq s2, 32, dealSingle
+    beq s2, t1, dealSingle
     addi s2, s2, -48
     addi s0, s0, 1
 
     lb s3, 0(s0)
-    beq s3, 32, dealDouble
+    beq s3, t1, dealDouble
     addi s3, s3, -48
     addi s0, s0, 1
 
@@ -72,8 +73,8 @@ dealSingle:
 
 dealDouble:
     li t1, 10
-    mul s1, s1, 10
-    addi s1, s1, s2
+    mul s1, s1, t1
+    add s1, s1, s2
     addi s0, s0, 8 # Pula o resto da linha e o 255
     mv a0, s1
     ret
@@ -102,9 +103,9 @@ handleMatrix:
         sb t4, 0(a2) # Guardando o Vermelho
         sb t4, 1(a2) # Guardando o Verde
         sb t4, 2(a2) # Guardando o Azul
-        sb t5, 3(a2) # Guardando o alfa
+        sb t5, 3(a2) # Guardando o Alfa
 
-        jal setPixel
+        j setPixel
 
         addi t0, t0, 1 # Atualizando Índice
         addi s0, s0, 1 # Atualizando Endereço
@@ -114,7 +115,6 @@ handleMatrix:
         lw ra, 0(sp)
         addi sp, sp, 4
         ret
-
 
 setPixel:
     li a7, 2200 # syscall setPixel (2200)
@@ -133,16 +133,10 @@ open:
     ecall
 
 read:
-    la a1, input_adress # buffer
+    la a0, input_file
+    la a1, input_address # buffer
+    li a2, 262159
     li a7, 63           # syscall read (63)
-    ecall
-    ret
-
-write:
-    li a0, 1            # file descriptor = 1 (stdout)
-    la a1, result       # buffer
-    li a2, 20           # size - Writes 20 bytes.
-    li a7, 64           # syscall write (64)
     ecall
     ret
 
@@ -150,7 +144,8 @@ write:
 .bss
 
 input_address: .skip 0x4000F # buffer for the whole file
-input_file: .asciz "image.pgm"
 a2_buffer: .skip 32
-
 result: .skip 0x20
+
+.data
+input_file: .asciz "image.pgm"
