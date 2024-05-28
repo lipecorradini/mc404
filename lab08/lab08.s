@@ -47,18 +47,21 @@ getSize:
     # s0: ponteiro atualizado para o começo da matriz
 
     li t1, 32 # Barra de Espaço
+    li t4, 10
     
-    lb s1, 0(s0) # Primeiro dígito do tamanho
+    lbu s1, 0(s0) # Primeiro dígito do tamanho
     addi s1, s1, -48
     addi s0, s0, 1
 
-    lb s2, 0(s0) # Segundo dígito do tamanho
+    lbu s2, 0(s0) # Segundo dígito do tamanho
     beq s2, t1, dealSingle
+    beq s2, t4, dealSingle
     addi s2, s2, -48
     addi s0, s0, 1
 
-    lb s3, 0(s0)
+    lbu s3, 0(s0)
     beq s3, t1, dealDouble
+    beq s3, t4, dealDouble
     addi s3, s3, -48
     addi s0, s0, 1
 
@@ -92,17 +95,21 @@ dealDouble:
 jumpIntensity:
     li t1, 10 # '\n'
     addi s0, s0, 1
-    lb s1, (s0)
+    lbu s1, (s0)
     # Ve se o segundo é '\n'
     beq s1, t1, endHeader
 
     addi s0, s0, 1
-    lb s1, (s0)
+    lbu s1, (s0)
     # Ve se o terceiro é '\n'
     beq s1, t1, endHeader
 
     # Assume que o quarto é '\n'
     addi s0, s0, 1
+    verult:
+    lbu s4, (s0)
+    # lbu s4, 1(s0)
+    # lbu s4, 2(s0)
 
 endHeader:
     addi s0, s0, 1
@@ -123,29 +130,26 @@ handleMatrix:
     li t0, 0 # Contador
     mv t3, s1 # Guardando o número de colunas
     li t5, 255 # Salvando o Alfa
-    la a2, a2_buffer # Salvando o Buffer
+    # la a2, a2_buffer # Salvando o Buffer
+    li a2, 0X00000000
 
     for:
         bge t0, t2, endFor
         rem a0, t0, t3 # Guardando o X
         div a1, t0, t3 # Guardando o Y
 
-        lb t4, 0(s0)
+        lbu t4, 0(s0)
 
-        vercmc:
-        li t0, 0xFF000000
-        li t1, 0x00Ff0000
+        li a2, 0X00000000
 
-        
+        slli s3, t4, 24
+        slli s4, t4, 16
+        slli s5, t4, 8
 
-        sb t4, 3(a2) # Guardando o Vermelho
-        # lb t6, 0(a2)
-        sb t4, 2(a2) # Guardando o Verde
-        # lb t6, 1(a2)
-        sb t4, 1(a2) # Guardando o Azul
-        # lb t6, 2(a2)
-        sb t5, 0(a2) # Guardando o Alfa
-        # lb t6, 3(a2)
+        add a2, a2, t5
+        add a2, a2, s3
+        add a2, a2, s4
+        add a2, a2, s5
 
         vpix:
 
@@ -154,10 +158,6 @@ handleMatrix:
         addi t0, t0, 1 # Atualizando Índice
         addi s0, s0, 1 # Atualizando Endereço
         j for
-
-        # verprox:
-        #    j for
-         
 
     endFor:
         lw ra, 0(sp)
