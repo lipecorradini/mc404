@@ -22,8 +22,8 @@ main:
     jal getSize
     mv a1, a0
     jal getSize
-        # Colunas em a1 e Linhas em a0
-
+    
+    # Colunas em a1 e Linhas em a0
     mv t5, a0
     mv a0, a1
     mv a1, t5
@@ -94,22 +94,19 @@ dealDouble:
 
 jumpIntensity:
     li t1, 10 # '\n'
+    
+    # Ve se o segundo é '\n'
     addi s0, s0, 1
     lbu s1, (s0)
-    # Ve se o segundo é '\n'
     beq s1, t1, endHeader
 
+    # Ve se o terceiro é '\n'
     addi s0, s0, 1
     lbu s1, (s0)
-    # Ve se o terceiro é '\n'
     beq s1, t1, endHeader
 
     # Assume que o quarto é '\n'
     addi s0, s0, 1
-    verult:
-    lbu s4, (s0)
-    # lbu s4, 1(s0)
-    # lbu s4, 2(s0)
 
 endHeader:
     addi s0, s0, 1
@@ -130,7 +127,6 @@ handleMatrix:
     li t0, 0 # Contador
     mv t3, s1 # Guardando o número de colunas
     li t5, 255 # Salvando o Alfa
-    # la a2, a2_buffer # Salvando o Buffer
     li a2, 0X00000000
 
     for:
@@ -151,8 +147,6 @@ handleMatrix:
         add a2, a2, s4
         add a2, a2, s5
 
-        vpix:
-
         jal setPixel
 
         addi t0, t0, 1 # Atualizando Índice
@@ -164,11 +158,7 @@ handleMatrix:
         addi sp, sp, 4
         ret
 
-    # verprimdif:
-    #     ret
-
 setPixel:
-    # li a2, 0xFF007FFF
     li a7, 2200 # syscall setPixel (2200)
     ecall
     ret
