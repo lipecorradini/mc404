@@ -258,7 +258,6 @@ save_answer:
     sb t6, 1(s1) # Guarda em s1 na memória
     rem a7, a7, t5
 
-    aq_ta_dando_erro:
     li t5, 10
     div t6, a7, t5
     addi t6, t6, 48
