@@ -50,11 +50,16 @@ recursion:
     add s1, s1, a2
     add s1, s1, a3
 
+    # Atualizando o contador
     addi t1, t1, 1
 
+    # Vendo se chegou na soma correta
     beq a0, s1, fim_normal
     
+    # Atualizando o endereço para ser do novo nó
     la s0, (s0)
+
+    # Vendo se o endereço final não é zero
     beq s0, 0, fim_nenhum
 
     j recursion
