@@ -25,6 +25,7 @@ puts:
     # Percorrer a string até encontrar um '\0'
     loop_puts:
         beq s1, t0, end_puts
+        ver_char:
         lb s1, (s3) # Salvando novo caractere em s1
         sb s1, (s0)
         addi s3, s3, 1
@@ -125,7 +126,7 @@ atoi:
 
     conversao:
         lbu t4, 0(t0)
-        li t5, 3       # Caractere fim de linha
+        li t5, 10       # Caractere fim de linha
 
     loop_in:
         beq t4, t5, fim_read
@@ -163,7 +164,8 @@ itoa:
     li t0, 0 # Contador
     mv s2, a0 # Guardando o número em s2
     mv t5, a2 # Base em t5
-    mv s1, a1 # Guardando o buffer
+    mv s4, a1 # Guardando o buffer
+    la s1, result
     li t4, 1
 
     bge s2, t0, loop_out # Se for maior que t0, segue normal    
@@ -197,10 +199,13 @@ itoa:
 # Parte 2
 
     save_answer:
-        li t1, -1
         li t3, 0
         addi s1, s1, -1
+        mv s2, a1
+
     loop_itoa:
+        # em s1 está a string invertida
+        # em s2 estará o novo buffer
         lb t2, (s1)
         sb t2, (s2)
         addi s1, s1, -1
@@ -212,7 +217,7 @@ itoa:
     fim_save:
         li t5, 10
         sb t5, (s2)
-        la a0, result
+        mv a0, a1
 
         # Retomando endereço de Retorno
         lw ra, (sp)

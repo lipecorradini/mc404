@@ -21,8 +21,10 @@ void _start(){
     // puts(itoa(100, buffer, 10));
 
     test = gets(buffer);
+    // puts(test);
+    val = atoi(test);
+    test = itoa(val, buffer, 10);
     puts(test);
-    // val = atoi(gets(buffer));
     // puts(itoa(recursive_tree_search(&root_node, val), buffer, 10));
     exit(0);
 }
